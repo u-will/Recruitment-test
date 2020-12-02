@@ -10,6 +10,11 @@ const pg = require('pg');
 const app = express();
 const superagent = require('superagent');
 
+/** MOREL */
+const request = require('request-promise');
+
+
+
 /********************** SETUP SERVER CONSTANTS **********************/
 const client = new pg.Client(process.env.DATABASE_URL);
 const PORT = process.env.PORT;
@@ -40,14 +45,28 @@ function SaveToDataBase(req, res) {
   // console.log(values);
   return client.query(SQL, values)
     .then( () => {
-      let slackUrl = `https://hooks.slack.com/services/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`
-      superagent.post(slackUrl)
-        .set('Content-type:', 'application/json')
-        .send({ UserInfo: `${req.body.first_name, req.body.last_name, req.body.email, req.body.phone_number, req.body.password }`})
+      let slackUrl = `https://hooks.slack.com/services/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`
+      const slackBody = {
+        mkdwn: true,
+        text: `Ulrich Motchoffo!`,
+        attachments: values.map(val => ({
+          color: 'good',
+          text: val
+        }))
+      }
+
+      const res2 = request({
+        url: slackUrl,
+        method: 'POST',
+        body: slackBody,
+        json: true
+      });
+
+      console.log(res2);
+
+      // to see if my user's info is being handle preprely
       res.send({
       message: `hello ${req.body.first_name} your user was registered !`
     })})
   .catch(err => handleError(err, res))
 }
-
-
